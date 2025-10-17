@@ -14,14 +14,14 @@ _nomic_ef = OllamaEmbeddingFunction(
 )
 
 
-def _qry(col, txt):
+def _qry(col: chromadb.Collection, txt: str) -> None:
     res = col.query(query_texts=[txt], n_results=2)
     print(res)
 
 
-def ephemeral():
+def ephemeral() -> None:
     cl = chromadb.Client()
-    col = cl.create_collection(name="my_collection")
+    col: chromadb.Collection = cl.create_collection(name="my_collection")
     col.add(
         ids=["id1", "id2"],
         documents=[
@@ -34,7 +34,9 @@ def ephemeral():
     _qry(col, "This is a query about Florida.")
 
 
-def _persistent_db_setup(embedding_function=DefaultEmbeddingFunction()):
+def _persistent_db_setup(
+    embedding_function: chromadb.EmbeddingFunction = DefaultEmbeddingFunction(),
+) -> None:
     cl = chromadb.PersistentClient(path="/tmp/mychroma.db")
     col = cl.create_collection(
         name="my_collection", embedding_function=embedding_function
@@ -49,12 +51,12 @@ def _persistent_db_setup(embedding_function=DefaultEmbeddingFunction()):
     )
 
 
-def _persistent_db_teardown():
+def _persistent_db_teardown() -> None:
     cl = chromadb.PersistentClient(path="/tmp/mychroma.db")
     cl.delete_collection(name="my_collection")
 
 
-def _persistent_db_query(txt):
+def _persistent_db_query(txt: str) -> None:
     cl = chromadb.PersistentClient(path="/tmp/mychroma.db")
     col = cl.get_collection(name="my_collection")
 
@@ -62,8 +64,8 @@ def _persistent_db_query(txt):
     print(res)
 
 
-def persistent():
-    _persistent_db_setup(embedding_function=_nomic_ef)
+def persistent() -> None:
+    _persistent_db_setup(embedding_function=_gemma_ef)
     _persistent_db_query("This is a query document about Hawaii.")
     _persistent_db_query("This is a query document about Florida.")
     _persistent_db_teardown()
